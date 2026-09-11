@@ -1,0 +1,94 @@
+.punto-venta {
+  display: block;
+}
+
+.agregar-linea {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.agregar-linea .campo {
+  flex: 1;
+}
+
+.bloque-inline {
+  display: block;
+  font-size: 0.75rem;
+}
+
+.contador {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.contador input {
+  width: 62px;
+  padding: 5px 7px;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.totales {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 16px;
+  margin-left: auto;
+  width: min(280px, 100%);
+  font-size: 0.89rem;
+}
+
+.totales div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.totales span {
+  color: var(--texto-suave);
+}
+
+.totales .total {
+  padding-top: 8px;
+  border-top: 1px solid var(--borde);
+  font-size: 1.06rem;
+}
+
+.cobro {
+  align-items: end;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--borde);
+}
+
+.campo-boton {
+  justify-content: flex-end;
+}
+
+.campo-boton .btn {
+  padding: 11px 16px;
+}
+
+.fila-detalle > td {
+  background: var(--fondo-suave);
+}
+
+.tabla-interna {
+  background: var(--superficie);
+  border-radius: 10px;
+}
+
+.tabla-interna th {
+  font-size: 0.68rem;
+}
+
+.resumen-detalle {
+  margin-top: 8px;
+  text-align: right;
+}

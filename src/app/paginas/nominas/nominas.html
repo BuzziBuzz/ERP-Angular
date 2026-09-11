@@ -1,0 +1,242 @@
+<div class="pagina-titulo">
+  <div>
+    <h1>Nóminas</h1>
+    <p>Padrón de empleados y generación de nómina mensual.</p>
+  </div>
+
+  <div class="acciones">
+    <button type="button" class="btn" (click)="nuevo()">+ Nuevo empleado</button>
+  </div>
+</div>
+
+<section class="rejilla rejilla-kpi">
+  <article class="kpi">
+    <p class="kpi-etiqueta">👥 Empleados activos</p>
+    <p class="kpi-valor">{{ store.empleadosActivos().length }}</p>
+    <p class="kpi-nota">De {{ store.empleados().length }} en el padrón</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">💼 Costo mensual bruto</p>
+    <p class="kpi-valor">{{ store.costoNominaMensual() | moneda }}</p>
+    <p class="kpi-nota">Suma de sueldos activos</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">🧾 Nóminas generadas</p>
+    <p class="kpi-valor">{{ store.nominas().length }}</p>
+    <p class="kpi-nota">Una por periodo</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">💸 Neto pagado</p>
+    <p class="kpi-valor negativo">{{ totalPagado() | moneda }}</p>
+    <p class="kpi-nota">Acumulado histórico</p>
+  </article>
+</section>
+
+@if (formAbierto()) {
+  <section class="bloque tarjeta">
+    <div class="seccion-titulo">
+      <h2>{{ borrador().id ? 'Editar empleado' : 'Nuevo empleado' }}</h2>
+      <button type="button" class="btn btn-suave btn-mini" (click)="cerrarForm()">Cancelar</button>
+    </div>
+
+    <div class="form-rejilla">
+      <div class="campo">
+        <label for="nombre">Nombre completo</label>
+        <input id="nombre" type="text" [value]="borrador().nombre" (input)="campo('nombre', $any($event.target).value)" />
+      </div>
+
+      <div class="campo">
+        <label for="puesto">Puesto</label>
+        <input id="puesto" type="text" [value]="borrador().puesto" (input)="campo('puesto', $any($event.target).value)" />
+      </div>
+
+      <div class="campo">
+        <label for="salario">Salario mensual bruto</label>
+        <input
+          id="salario"
+          type="number"
+          min="0"
+          step="100"
+          [value]="borrador().salarioMensual"
+          (input)="campo('salarioMensual', numero($any($event.target).value))"
+        />
+      </div>
+
+      <div class="campo campo-check">
+        <input
+          id="activo"
+          type="checkbox"
+          [checked]="borrador().activo"
+          (change)="campo('activo', $any($event.target).checked)"
+        />
+        <label for="activo">Activo en nómina</label>
+      </div>
+    </div>
+
+    <div class="acciones acciones-form">
+      <button type="button" class="btn" (click)="guardar()">Guardar empleado</button>
+      <button type="button" class="btn btn-suave" (click)="cerrarForm()">Cancelar</button>
+    </div>
+  </section>
+}
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Padrón de empleados</h2>
+    <span>{{ empleados().length }} de {{ store.empleados().length }}</span>
+  </div>
+
+  @if (empleados().length === 0) {
+    <p class="vacio">No hay empleados que coincidan con la búsqueda.</p>
+  } @else {
+    <div class="tabla-scroll">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Puesto</th>
+            <th class="num">Salario mensual</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (empleado of empleados(); track empleado.id) {
+            <tr>
+              <td class="fuerte">{{ empleado.nombre }}</td>
+              <td class="suave">{{ empleado.puesto }}</td>
+              <td class="num">{{ empleado.salarioMensual | moneda }}</td>
+              <td>
+                @if (empleado.activo) {
+                  <span class="insignia insignia-ok">Activo</span>
+                } @else {
+                  <span class="insignia insignia-neutra">Inactivo</span>
+                }
+              </td>
+              <td class="num">
+                <div class="acciones">
+                  <button type="button" class="btn btn-suave btn-mini" (click)="editar(empleado)">Editar</button>
+                  <button type="button" class="btn btn-suave btn-mini" (click)="alternarActivo(empleado)">
+                    {{ empleado.activo ? 'Desactivar' : 'Activar' }}
+                  </button>
+                  <button type="button" class="btn btn-peligro btn-mini" (click)="eliminar(empleado)">Baja</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Generar nómina</h2>
+    <span>Se calcula sobre los {{ store.empleadosActivos().length }} empleados activos</span>
+  </div>
+
+  <div class="form-rejilla generar">
+    <div class="campo">
+      <label for="periodo">Periodo</label>
+      <input id="periodo" type="month" [value]="periodo()" (input)="periodo.set($any($event.target).value)" />
+    </div>
+
+    <div class="campo campo-boton">
+      <button type="button" class="btn btn-exito" [disabled]="store.empleadosActivos().length === 0" (click)="generar()">
+        Generar nómina del periodo
+      </button>
+    </div>
+  </div>
+
+  <p class="aviso-calculo">
+    ISR e IMSS se estiman con tasas fijas por tramo para presupuestar el costo de nómina. No sustituyen
+    el cálculo fiscal oficial: valida los importes con tu contador antes de pagar o declarar.
+  </p>
+</section>
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Nóminas generadas</h2>
+    <span>{{ historial().length }} de {{ store.nominas().length }}</span>
+  </div>
+
+  @if (historial().length === 0) {
+    <p class="vacio">
+      @if (store.nominas().length === 0) {
+        Todavía no has generado ninguna nómina.
+      } @else {
+        Ninguna nómina coincide con la búsqueda.
+      }
+    </p>
+  } @else {
+    <div class="tabla-scroll">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Periodo</th>
+            <th>Generada</th>
+            <th class="num">Empleados</th>
+            <th class="num">Bruto</th>
+            <th class="num">Deducciones</th>
+            <th class="num">Neto</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (nomina of historial(); track nomina.id) {
+            <tr>
+              <td class="mono fuerte">{{ nomina.folio }}</td>
+              <td>{{ nomina.periodo | periodo }}</td>
+              <td class="tenue">{{ nomina.fecha | fecha }}</td>
+              <td class="num">{{ nomina.lineas.length }}</td>
+              <td class="num">{{ nomina.totalBruto | moneda }}</td>
+              <td class="num negativo">{{ nomina.totalDeducciones | moneda }}</td>
+              <td class="num fuerte">{{ nomina.totalNeto | moneda }}</td>
+              <td class="num">
+                <button type="button" class="btn btn-suave btn-mini" (click)="alternarDetalle(nomina.id)">
+                  {{ detalleAbierto() === nomina.id ? 'Ocultar' : 'Detalle' }}
+                </button>
+              </td>
+            </tr>
+
+            @if (detalleAbierto() === nomina.id) {
+              <tr class="fila-detalle">
+                <td colspan="8">
+                  <table class="tabla tabla-interna">
+                    <thead>
+                      <tr>
+                        <th>Empleado</th>
+                        <th>Puesto</th>
+                        <th class="num">Bruto</th>
+                        <th class="num">ISR</th>
+                        <th class="num">IMSS</th>
+                        <th class="num">Neto</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (linea of nomina.lineas; track linea.empleadoId) {
+                        <tr>
+                          <td>{{ linea.nombre }}</td>
+                          <td class="suave">{{ linea.puesto }}</td>
+                          <td class="num">{{ linea.bruto | moneda }}</td>
+                          <td class="num negativo">{{ linea.isr | moneda }}</td>
+                          <td class="num negativo">{{ linea.imss | moneda }}</td>
+                          <td class="num fuerte">{{ linea.neto | moneda }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

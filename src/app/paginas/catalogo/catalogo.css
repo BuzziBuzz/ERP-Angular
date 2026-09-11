@@ -1,0 +1,12 @@
+.disposicion {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .disposicion {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

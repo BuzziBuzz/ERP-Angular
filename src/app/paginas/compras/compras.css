@@ -1,0 +1,35 @@
+.linea-nueva {
+  align-items: end;
+}
+
+.acciones-form {
+  margin-top: 16px;
+}
+
+.lineas-borrador {
+  margin-top: 18px;
+}
+
+.total-borrador {
+  margin-top: 12px;
+  text-align: right;
+  font-size: 1.05rem;
+}
+
+.fila-detalle > td {
+  background: var(--fondo-suave);
+}
+
+.tabla-interna {
+  background: var(--superficie);
+}
+
+.tabla-interna th {
+  font-size: 0.68rem;
+}
+
+.linea-fecha {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.74rem;
+}

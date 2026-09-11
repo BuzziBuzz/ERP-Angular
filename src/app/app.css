@@ -1,0 +1,76 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 24px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.marca-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--acento);
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.marca-nombre {
+  color: var(--texto);
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+/* La barra de búsqueda ocupa todo el centro disponible de la cabecera. */
+.centro-busqueda {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.contenido {
+  flex: 1;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 720px) {
+  .barra {
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .marca-nombre {
+    display: none;
+  }
+
+  .contenido {
+    padding: 18px 14px 48px;
+  }
+}

@@ -1,0 +1,21 @@
+<div class="pagina-titulo">
+  <div>
+    <h1>Catálogo</h1>
+    <p>{{ resultados().length }} de {{ store.productos().length }} productos</p>
+  </div>
+
+  <div class="acciones">
+    <a class="btn btn-suave" routerLink="/stock">Administrar productos</a>
+    <a class="btn" routerLink="/ventas">
+      Ir al carrito
+      @if (store.carritoUnidades() > 0) {
+        <span class="insignia insignia-info">{{ store.carritoUnidades() }}</span>
+      }
+    </a>
+  </div>
+</div>
+
+<div class="disposicion">
+  <app-sidebar [seleccionada]="categoria()" (seleccionarCategoria)="categoria.set($event)" />
+  <app-galeria [productos]="resultados()" (agregar)="agregarAlCarrito($event)" />
+</div>

@@ -1,0 +1,221 @@
+<div class="pagina-titulo">
+  <div>
+    <h1>Compras</h1>
+    <p>Órdenes a proveedores. Al recibirlas entra la mercancía al stock y se registra el egreso.</p>
+  </div>
+</div>
+
+<section class="rejilla rejilla-kpi">
+  <article class="kpi">
+    <p class="kpi-etiqueta">🚚 Órdenes pendientes</p>
+    <p class="kpi-valor" [class.atencion]="store.comprasPendientes().length > 0">
+      {{ store.comprasPendientes().length }}
+    </p>
+    <p class="kpi-nota">De {{ store.compras().length }} órdenes en total</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">⚠️ Productos por reponer</p>
+    <p class="kpi-valor">{{ store.productosBajoStock().length }}</p>
+    <p class="kpi-nota">Están en o bajo su mínimo</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">📉 Gasto en compras</p>
+    <p class="kpi-valor negativo">{{ store.totalEgresos() | moneda }}</p>
+    <p class="kpi-nota">Egresos acumulados del negocio</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">📦 Inventario a costo</p>
+    <p class="kpi-valor">{{ store.valorInventario() | moneda }}</p>
+    <p class="kpi-nota">{{ store.unidadesEnStock() }} unidades</p>
+  </article>
+</section>
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Nueva orden de compra</h2>
+    <span>La orden queda pendiente hasta que la recibas</span>
+  </div>
+
+  <div class="form-rejilla linea-nueva">
+    <div class="campo">
+      <label for="proveedor">Proveedor</label>
+      <input
+        id="proveedor"
+        type="text"
+        list="proveedores"
+        placeholder="Nombre del proveedor"
+        [value]="proveedor()"
+        (input)="proveedor.set($any($event.target).value)"
+      />
+      <datalist id="proveedores">
+        @for (nombre of proveedoresSugeridos; track nombre) {
+          <option [value]="nombre"></option>
+        }
+      </datalist>
+    </div>
+
+    <div class="campo">
+      <label for="producto-compra">Producto</label>
+      <select id="producto-compra" [value]="productoElegido() ?? ''" (change)="elegirProducto($any($event.target).value)">
+        <option value="">Selecciona un producto…</option>
+        @for (producto of store.productos(); track producto.id) {
+          <option [value]="producto.id">{{ producto.titulo }} ({{ producto.stock }} en stock)</option>
+        }
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="cantidad-compra">Cantidad</label>
+      <input
+        id="cantidad-compra"
+        type="number"
+        min="1"
+        [value]="cantidad()"
+        (input)="cantidad.set(numero($any($event.target).value))"
+      />
+    </div>
+
+    <div class="campo">
+      <label for="costo-compra">Costo unitario</label>
+      <input
+        id="costo-compra"
+        type="number"
+        min="0"
+        step="0.5"
+        [value]="costo()"
+        (input)="costo.set(numero($any($event.target).value))"
+      />
+    </div>
+
+    <div class="campo campo-boton">
+      <button type="button" class="btn btn-suave" (click)="agregarLinea()">+ Agregar a la orden</button>
+    </div>
+  </div>
+
+  @if (lineas().length > 0) {
+    <div class="lineas-borrador tabla-scroll">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th class="num">Cantidad</th>
+            <th class="num">Costo unitario</th>
+            <th class="num">Importe</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (linea of lineas(); track linea.productoId) {
+            <tr>
+              <td>{{ linea.titulo }}</td>
+              <td class="num">{{ linea.cantidad }}</td>
+              <td class="num">{{ linea.costo | moneda }}</td>
+              <td class="num fuerte">{{ linea.cantidad * linea.costo | moneda }}</td>
+              <td class="num">
+                <button type="button" class="btn btn-peligro btn-mini" (click)="quitarLinea(linea.productoId)">Quitar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="total-borrador">Total de la orden: <strong>{{ totalBorrador() | moneda }}</strong></p>
+  }
+
+  <div class="acciones acciones-form">
+    <button type="button" class="btn" [disabled]="lineas().length === 0" (click)="crear()">Crear orden</button>
+  </div>
+</section>
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Órdenes registradas</h2>
+    <span>{{ historial().length }} de {{ store.compras().length }}</span>
+  </div>
+
+  @if (historial().length === 0) {
+    <p class="vacio">
+      @if (store.compras().length === 0) {
+        Todavía no has creado órdenes de compra.
+      } @else {
+        Ninguna orden coincide con la búsqueda.
+      }
+    </p>
+  } @else {
+    <div class="tabla-scroll">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Fecha</th>
+            <th>Proveedor</th>
+            <th class="num">Productos</th>
+            <th class="num">Total</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (compra of historial(); track compra.id) {
+            <tr>
+              <td class="mono fuerte">{{ compra.folio }}</td>
+              <td class="tenue">{{ compra.fecha | fecha }}</td>
+              <td>{{ compra.proveedor }}</td>
+              <td class="num">{{ compra.lineas.length }}</td>
+              <td class="num fuerte">{{ compra.total | moneda }}</td>
+              <td>
+                <span [class]="'insignia ' + claseEstado(compra.estado)">{{ compra.estado }}</span>
+                @if (compra.fechaRecepcion) {
+                  <small class="tenue linea-fecha">{{ compra.fechaRecepcion | fecha }}</small>
+                }
+              </td>
+              <td class="num">
+                <div class="acciones">
+                  <button type="button" class="btn btn-suave btn-mini" (click)="alternarDetalle(compra.id)">
+                    {{ detalleAbierto() === compra.id ? 'Ocultar' : 'Detalle' }}
+                  </button>
+
+                  @if (compra.estado === 'pendiente') {
+                    <button type="button" class="btn btn-exito btn-mini" (click)="recibir(compra.id)">Recibir</button>
+                    <button type="button" class="btn btn-peligro btn-mini" (click)="cancelar(compra.id)">Cancelar</button>
+                  }
+                </div>
+              </td>
+            </tr>
+
+            @if (detalleAbierto() === compra.id) {
+              <tr class="fila-detalle">
+                <td colspan="7">
+                  <table class="tabla tabla-interna">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th class="num">Cantidad</th>
+                        <th class="num">Costo</th>
+                        <th class="num">Importe</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (linea of compra.lineas; track linea.productoId) {
+                        <tr>
+                          <td>{{ linea.titulo }}</td>
+                          <td class="num">{{ linea.cantidad }}</td>
+                          <td class="num">{{ linea.costo | moneda }}</td>
+                          <td class="num">{{ linea.importe | moneda }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,44 @@
+@if (productos().length === 0) {
+  <p class="vacio">No hay productos que coincidan con la búsqueda.</p>
+} @else {
+  <div class="galeria">
+    @for (producto of productos(); track producto.id) {
+      <article class="producto-card" [class.agotado]="producto.stock === 0">
+        <div class="producto-imagen">
+          @if (hayImagen(producto)) {
+            <img [src]="producto.imagen" [alt]="producto.titulo" (error)="marcarImagenRota(producto.id)" />
+          } @else {
+            <span class="producto-inicial" aria-hidden="true">{{ inicial(producto) }}</span>
+          }
+
+          @if (producto.stock === 0) {
+            <span class="etiqueta-stock insignia insignia-peligro">Agotado</span>
+          } @else if (producto.stock <= producto.stockMinimo) {
+            <span class="etiqueta-stock insignia insignia-alerta">Quedan {{ producto.stock }}</span>
+          } @else {
+            <span class="etiqueta-stock insignia insignia-neutra">{{ producto.stock }} en stock</span>
+          }
+        </div>
+
+        <div class="producto-info">
+          <h2>{{ producto.titulo }}</h2>
+          <p>{{ producto.descripcion }}</p>
+
+          <div class="producto-footer">
+            <span class="precio">{{ producto.precio | moneda }}</span>
+
+            <button
+              type="button"
+              class="btn btn-mini"
+              [disabled]="producto.stock === 0"
+              (click)="agregar.emit(producto)"
+              [attr.aria-label]="'Agregar ' + producto.titulo + ' al carrito'"
+            >
+              + Agregar
+            </button>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+}

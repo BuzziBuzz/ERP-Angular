@@ -1,0 +1,35 @@
+<nav class="sidebar" aria-label="Categorías del catálogo">
+  <h3>Categorías</h3>
+
+  <ul>
+    <li>
+      <button
+        type="button"
+        class="categoria-card"
+        [class.activa]="seleccionada() === ''"
+        [attr.aria-pressed]="seleccionada() === ''"
+        (click)="elegir('')"
+      >
+        <span class="categoria-icono" aria-hidden="true">🗂️</span>
+        <span class="categoria-nombre">Todas</span>
+        <span class="categoria-conteo">{{ conteo('') }}</span>
+      </button>
+    </li>
+
+    @for (cat of categorias(); track cat.categoria) {
+      <li>
+        <button
+          type="button"
+          class="categoria-card"
+          [class.activa]="seleccionada() === cat.categoria"
+          [attr.aria-pressed]="seleccionada() === cat.categoria"
+          (click)="elegir(cat.categoria)"
+        >
+          <span class="categoria-icono" aria-hidden="true">{{ cat.icono }}</span>
+          <span class="categoria-nombre">{{ cat.titulo }}</span>
+          <span class="categoria-conteo">{{ conteo(cat.categoria) }}</span>
+        </button>
+      </li>
+    }
+  </ul>
+</nav>

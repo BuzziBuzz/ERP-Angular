@@ -1,0 +1,18 @@
+<div class="app">
+  <header class="barra">
+    <a class="marca" routerLink="/" title="Ir al panel">
+      <span class="marca-logo">ERP</span>
+      <span class="marca-nombre">Drinks</span>
+    </a>
+
+    <div class="centro-busqueda">
+      <app-search />
+    </div>
+  </header>
+
+  <main class="contenido">
+    <router-outlet />
+  </main>
+</div>
+
+<app-avisos />

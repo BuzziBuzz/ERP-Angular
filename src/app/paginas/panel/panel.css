@@ -1,0 +1,92 @@
+.mas-vendidos {
+  margin-top: 22px;
+}
+
+.alertas {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.alertas li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+}
+
+.alertas li div {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.alertas strong {
+  font-size: 0.89rem;
+}
+
+.alertas small {
+  color: var(--texto-tenue);
+  font-size: 0.79rem;
+}
+
+.alerta-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--fondo-suave);
+  font-size: 1rem;
+}
+
+.alerta-icono.hay {
+  background: var(--alerta-suave);
+}
+
+.accesos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.acceso {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 16px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  color: var(--texto);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.acceso:hover {
+  border-color: var(--acento);
+  transform: translateY(-2px);
+}
+
+.acceso-icono {
+  margin-bottom: 6px;
+  font-size: 1.3rem;
+}
+
+.acceso strong {
+  font-size: 0.93rem;
+}
+
+.acceso small {
+  color: var(--texto-tenue);
+  font-size: 0.79rem;
+}

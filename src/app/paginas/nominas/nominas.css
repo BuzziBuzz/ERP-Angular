@@ -1,0 +1,28 @@
+.acciones-form {
+  margin-top: 16px;
+}
+
+.generar {
+  align-items: end;
+}
+
+.fila-detalle > td {
+  background: var(--fondo-suave);
+}
+
+.tabla-interna {
+  background: var(--superficie);
+}
+
+.tabla-interna th {
+  font-size: 0.68rem;
+}
+
+.aviso-calculo {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--alerta-suave);
+  color: #92400e;
+  font-size: 0.8rem;
+}

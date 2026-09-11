@@ -1,0 +1,238 @@
+<div class="pagina-titulo">
+  <div>
+    <h1>Ventas</h1>
+    <p>Punto de venta e historial. Cada venta descuenta stock y genera un ingreso en finanzas.</p>
+  </div>
+
+  <div class="acciones">
+    <a class="btn btn-suave" routerLink="/catalogo">Abrir catálogo</a>
+  </div>
+</div>
+
+<section class="rejilla rejilla-kpi">
+  <article class="kpi">
+    <p class="kpi-etiqueta">🧾 Ventas registradas</p>
+    <p class="kpi-valor">{{ store.ventasRegistradas().length }}</p>
+    <p class="kpi-nota">{{ store.ventas().length - store.ventasRegistradas().length }} canceladas</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">💵 Total vendido</p>
+    <p class="kpi-valor positivo">{{ store.totalVendido() | moneda }}</p>
+    <p class="kpi-nota">IVA incluido</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">🎯 Ticket promedio</p>
+    <p class="kpi-valor">{{ store.ticketPromedio() | moneda }}</p>
+    <p class="kpi-nota">Por venta registrada</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">🛒 En el carrito</p>
+    <p class="kpi-valor">{{ store.carritoUnidades() }}</p>
+    <p class="kpi-nota">{{ store.carritoTotal() | moneda }} por cobrar</p>
+  </article>
+</section>
+
+<section class="bloque punto-venta">
+  <article class="tarjeta">
+    <div class="seccion-titulo">
+      <h2>Venta en curso</h2>
+      @if (store.carrito().length > 0) {
+        <button type="button" class="btn btn-suave btn-mini" (click)="vaciar()">Vaciar carrito</button>
+      }
+    </div>
+
+    <div class="agregar-linea">
+      <div class="campo">
+        <label for="producto">Agregar producto</label>
+        <select id="producto" [value]="productoElegido() ?? ''" (change)="elegirProducto($any($event.target).value)">
+          <option value="">Selecciona un producto…</option>
+          @for (producto of disponibles(); track producto.id) {
+            <option [value]="producto.id">
+              {{ producto.titulo }} — {{ producto.precio | moneda }} ({{ producto.stock }} disp.)
+            </option>
+          }
+        </select>
+      </div>
+
+      <button type="button" class="btn" (click)="agregarSeleccionado()">Agregar</button>
+    </div>
+
+    @if (store.carrito().length === 0) {
+      <p class="vacio">El carrito está vacío. Agrega productos desde aquí o desde el catálogo.</p>
+    } @else {
+      <div class="tabla-scroll">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th class="num">Precio</th>
+              <th class="num">Cantidad</th>
+              <th class="num">Importe</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (linea of store.carrito(); track linea.productoId) {
+              <tr>
+                <td>
+                  {{ linea.titulo }}
+                  <small class="tenue bloque-inline">{{ stockDisponible(linea.productoId) }} en stock</small>
+                </td>
+                <td class="num">{{ linea.precio | moneda }}</td>
+                <td class="num">
+                  <div class="contador">
+                    <button type="button" class="btn btn-suave btn-icono" (click)="sumar(linea.productoId, -1)" aria-label="Quitar uno">−</button>
+                    <input
+                      type="number"
+                      min="1"
+                      [value]="linea.cantidad"
+                      (change)="cambiarCantidad(linea.productoId, $any($event.target).value)"
+                      [attr.aria-label]="'Cantidad de ' + linea.titulo"
+                    />
+                    <button type="button" class="btn btn-suave btn-icono" (click)="sumar(linea.productoId, 1)" aria-label="Agregar uno">+</button>
+                  </div>
+                </td>
+                <td class="num fuerte">{{ linea.precio * linea.cantidad | moneda }}</td>
+                <td class="num">
+                  <button type="button" class="btn btn-peligro btn-mini" (click)="quitar(linea.productoId)">Quitar</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totales">
+        <div><span>Subtotal</span><strong>{{ store.carritoSubtotal() | moneda }}</strong></div>
+        <div><span>IVA 16%</span><strong>{{ store.carritoIva() | moneda }}</strong></div>
+        <div class="total"><span>Total</span><strong>{{ store.carritoTotal() | moneda }}</strong></div>
+      </div>
+    }
+
+    <div class="form-rejilla cobro">
+      <div class="campo">
+        <label for="cliente">Cliente</label>
+        <input
+          id="cliente"
+          type="text"
+          placeholder="Público en general"
+          [value]="cliente()"
+          (input)="cliente.set($any($event.target).value)"
+        />
+      </div>
+
+      <div class="campo">
+        <label for="metodo">Método de pago</label>
+        <select id="metodo" [value]="metodoPago()" (change)="metodoPago.set($any($event.target).value)">
+          @for (metodo of metodos; track metodo) {
+            <option [value]="metodo">{{ metodo }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo campo-boton">
+        <button type="button" class="btn btn-exito" [disabled]="store.carrito().length === 0" (click)="cobrar()">
+          Cobrar {{ store.carritoTotal() | moneda }}
+        </button>
+      </div>
+    </div>
+  </article>
+</section>
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Historial de ventas</h2>
+    <span>{{ historial().length }} de {{ store.ventas().length }}</span>
+  </div>
+
+  @if (historial().length === 0) {
+    <p class="vacio">
+      @if (store.ventas().length === 0) {
+        Aún no has registrado ninguna venta.
+      } @else {
+        Ninguna venta coincide con la búsqueda.
+      }
+    </p>
+  } @else {
+    <div class="tabla-scroll">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Pago</th>
+            <th class="num">Artículos</th>
+            <th class="num">Total</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (venta of historial(); track venta.id) {
+            <tr>
+              <td class="mono fuerte">{{ venta.folio }}</td>
+              <td class="tenue">{{ venta.fecha | fecha: true }}</td>
+              <td>{{ venta.cliente }}</td>
+              <td class="suave">{{ venta.metodoPago }}</td>
+              <td class="num">{{ venta.lineas.length }}</td>
+              <td class="num fuerte">{{ venta.total | moneda }}</td>
+              <td>
+                @if (venta.estado === 'registrada') {
+                  <span class="insignia insignia-ok">Registrada</span>
+                } @else {
+                  <span class="insignia insignia-peligro">Cancelada</span>
+                }
+              </td>
+              <td class="num">
+                <div class="acciones">
+                  <button type="button" class="btn btn-suave btn-mini" (click)="alternarDetalle(venta.id)">
+                    {{ detalleAbierto() === venta.id ? 'Ocultar' : 'Detalle' }}
+                  </button>
+                  @if (venta.estado === 'registrada') {
+                    <button type="button" class="btn btn-peligro btn-mini" (click)="cancelar(venta.id)">Cancelar</button>
+                  }
+                </div>
+              </td>
+            </tr>
+
+            @if (detalleAbierto() === venta.id) {
+              <tr class="fila-detalle">
+                <td colspan="8">
+                  <table class="tabla tabla-interna">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th class="num">Precio</th>
+                        <th class="num">Cantidad</th>
+                        <th class="num">Importe</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (linea of venta.lineas; track linea.productoId) {
+                        <tr>
+                          <td>{{ linea.titulo }}</td>
+                          <td class="num">{{ linea.precio | moneda }}</td>
+                          <td class="num">{{ linea.cantidad }}</td>
+                          <td class="num">{{ linea.importe | moneda }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+
+                  <p class="nota resumen-detalle">
+                    Subtotal {{ venta.subtotal | moneda }} · IVA {{ venta.iva | moneda }} ·
+                    <strong>Total {{ venta.total | moneda }}</strong>
+                  </p>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

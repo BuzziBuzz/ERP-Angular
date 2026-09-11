@@ -1,0 +1,196 @@
+<div class="pagina-titulo">
+  <div>
+    <h1>Panel general</h1>
+    <p>Resumen del negocio con la información guardada en este equipo.</p>
+  </div>
+
+  <div class="acciones">
+    <button type="button" class="btn btn-suave" (click)="exportar()">Exportar respaldo</button>
+
+    <label class="btn btn-suave">
+      Restaurar
+      <input type="file" accept="application/json" hidden (change)="importar($event)" />
+    </label>
+
+    <button type="button" class="btn btn-peligro" (click)="reiniciar()">Reiniciar datos</button>
+  </div>
+</div>
+
+<section class="rejilla rejilla-kpi">
+  <article class="kpi">
+    <p class="kpi-etiqueta">💵 Ingresos acumulados</p>
+    <p class="kpi-valor positivo">{{ store.totalIngresos() | moneda }}</p>
+    <p class="kpi-nota">{{ store.ventasRegistradas().length }} ventas registradas</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">📉 Egresos acumulados</p>
+    <p class="kpi-valor negativo">{{ store.totalEgresos() | moneda }}</p>
+    <p class="kpi-nota">Compras, nóminas y gastos</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">📈 Utilidad</p>
+    <p class="kpi-valor" [class.positivo]="store.utilidad() >= 0" [class.negativo]="store.utilidad() < 0">
+      {{ store.utilidad() | moneda }}
+    </p>
+    <p class="kpi-nota">Margen {{ store.margen() | number: '1.0-1' }}%</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">📦 Valor del inventario</p>
+    <p class="kpi-valor">{{ store.valorInventario() | moneda }}</p>
+    <p class="kpi-nota">{{ store.unidadesEnStock() }} unidades a costo</p>
+  </article>
+</section>
+
+<section class="bloque rejilla rejilla-2">
+  <article class="tarjeta">
+    <div class="seccion-titulo">
+      <h2>Ventas de este mes</h2>
+      <span>{{ ventasDelMes().length }} tickets</span>
+    </div>
+
+    <p class="kpi-valor">{{ totalMes() | moneda }}</p>
+    <p class="nota">Ticket promedio histórico: {{ store.ticketPromedio() | moneda }}</p>
+
+    <div class="seccion-titulo mas-vendidos">
+      <h2>Más vendidos</h2>
+    </div>
+
+    @if (masVendidos().length === 0) {
+      <p class="vacio">Todavía no hay ventas registradas.</p>
+    } @else {
+      <div class="tabla-scroll">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th class="num">Unidades</th>
+              <th class="num">Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fila of masVendidos(); track fila.titulo) {
+              <tr>
+                <td>{{ fila.titulo }}</td>
+                <td class="num">{{ fila.unidades }}</td>
+                <td class="num">{{ fila.importe | moneda }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </article>
+
+  <article class="tarjeta">
+    <div class="seccion-titulo">
+      <h2>Requiere atención</h2>
+    </div>
+
+    <ul class="alertas">
+      <li>
+        <span class="alerta-icono" [class.hay]="store.productosBajoStock().length > 0">📦</span>
+        <div>
+          <strong>{{ store.productosBajoStock().length }} productos en o bajo el mínimo</strong>
+          <small>
+            @if (store.productosBajoStock().length > 0) {
+              {{ store.productosBajoStock()[0].titulo }}
+              @if (store.productosBajoStock().length > 1) {
+                y {{ store.productosBajoStock().length - 1 }} más
+              }
+            } @else {
+              Inventario dentro de los niveles definidos
+            }
+          </small>
+        </div>
+        <a class="btn btn-suave btn-mini" routerLink="/stock">Ver</a>
+      </li>
+
+      <li>
+        <span class="alerta-icono" [class.hay]="store.comprasPendientes().length > 0">🚚</span>
+        <div>
+          <strong>{{ store.comprasPendientes().length }} órdenes de compra pendientes</strong>
+          <small>Recíbelas para actualizar inventario y egresos</small>
+        </div>
+        <a class="btn btn-suave btn-mini" routerLink="/compras">Ver</a>
+      </li>
+
+      <li>
+        <span class="alerta-icono" [class.hay]="store.carritoUnidades() > 0">🧾</span>
+        <div>
+          <strong>{{ store.carritoUnidades() }} artículos en el carrito</strong>
+          <small>Venta en curso sin cobrar</small>
+        </div>
+        <a class="btn btn-suave btn-mini" routerLink="/ventas">Ver</a>
+      </li>
+
+      <li>
+        <span class="alerta-icono">👥</span>
+        <div>
+          <strong>{{ store.costoNominaMensual() | moneda }} de nómina mensual</strong>
+          <small>{{ store.empleadosActivos().length }} empleados activos</small>
+        </div>
+        <a class="btn btn-suave btn-mini" routerLink="/nominas">Ver</a>
+      </li>
+    </ul>
+  </article>
+</section>
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Movimientos recientes</h2>
+    @if (store.busqueda()) {
+      <span>filtrando por "{{ store.busqueda() }}"</span>
+    }
+  </div>
+
+  @if (movimientosRecientes().length === 0) {
+    <p class="vacio">No hay movimientos que mostrar.</p>
+  } @else {
+    <div class="tabla-scroll">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Concepto</th>
+            <th>Categoría</th>
+            <th>Origen</th>
+            <th class="num">Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (movimiento of movimientosRecientes(); track movimiento.id) {
+            <tr>
+              <td class="tenue">{{ movimiento.fecha | fecha }}</td>
+              <td>{{ movimiento.concepto }}</td>
+              <td>{{ movimiento.categoria }}</td>
+              <td class="tenue">{{ movimiento.origen }}</td>
+              <td class="num fuerte" [class.positivo]="movimiento.tipo === 'ingreso'" [class.negativo]="movimiento.tipo === 'egreso'">
+                {{ movimiento.tipo === 'ingreso' ? '+' : '−' }}{{ movimiento.monto | moneda }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<section class="bloque">
+  <div class="seccion-titulo">
+    <h2>Módulos</h2>
+    <span>También disponibles en el botón ⋮ de la barra de búsqueda</span>
+  </div>
+
+  <div class="accesos">
+    @for (modulo of accesos; track modulo.ruta) {
+      <a class="acceso" [routerLink]="modulo.ruta">
+        <span class="acceso-icono" aria-hidden="true">{{ modulo.icono }}</span>
+        <strong>{{ modulo.titulo }}</strong>
+        <small>{{ modulo.descripcion }}</small>
+      </a>
+    }
+  </div>
+</section>

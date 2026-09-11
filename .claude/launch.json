@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "erp-drinks",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start", "--", "--port", "4287"],
+      "port": 4287,
+      "autoPort": false
+    }
+  ]
+}

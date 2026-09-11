@@ -1,0 +1,80 @@
+<form class="search-container" role="search" (submit)="enviar($event)">
+  <span class="search-icono" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="7" />
+      <line x1="16.5" y1="16.5" x2="21" y2="21" stroke-linecap="round" />
+    </svg>
+  </span>
+
+  <input
+    id="busqueda-global"
+    class="search-input"
+    type="text"
+    autocomplete="off"
+    [value]="store.busqueda()"
+    [placeholder]="pista()"
+    [attr.aria-label]="pista()"
+    (input)="escribir($event)"
+  />
+
+  @if (store.busqueda()) {
+    <button type="button" class="search-limpiar" (click)="limpiar()" aria-label="Limpiar búsqueda">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="5" y1="5" x2="19" y2="19" stroke-linecap="round" />
+        <line x1="19" y1="5" x2="5" y2="19" stroke-linecap="round" />
+      </svg>
+    </button>
+  }
+
+  <span class="search-modulo">{{ moduloActual().icono }} {{ moduloActual().titulo }}</span>
+
+  <span class="search-separador" aria-hidden="true"></span>
+
+  <button
+    type="button"
+    class="search-menu-btn"
+    [class.activo]="menuAbierto()"
+    (click)="alternarMenu()"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="menuAbierto()"
+    aria-controls="menu-modulos"
+    aria-label="Abrir módulos del ERP"
+    title="Módulos del ERP"
+  >
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+      <circle cx="12" cy="5" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="12" cy="19" r="2" />
+    </svg>
+  </button>
+
+  @if (menuAbierto()) {
+    <div class="menu-modulos" id="menu-modulos" role="menu">
+      <p class="menu-titulo">Módulos del ERP</p>
+
+      @for (modulo of modulos; track modulo.ruta) {
+        <a
+          class="menu-item"
+          role="menuitem"
+          [routerLink]="modulo.ruta"
+          routerLinkActive="activo"
+          [routerLinkActiveOptions]="esExacta(modulo)"
+          (click)="cerrarMenu()"
+        >
+          <span class="menu-icono" aria-hidden="true">{{ modulo.icono }}</span>
+
+          <span class="menu-texto">
+            <strong>{{ modulo.titulo }}</strong>
+            <small>{{ modulo.descripcion }}</small>
+          </span>
+
+          @if (insignia(modulo); as total) {
+            <span class="menu-insignia">{{ total }}</span>
+          }
+        </a>
+      }
+
+      <p class="menu-pie">Los datos se guardan en este navegador.</p>
+    </div>
+  }
+</form>

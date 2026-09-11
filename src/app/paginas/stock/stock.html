@@ -1,0 +1,184 @@
+<div class="pagina-titulo">
+  <div>
+    <h1>Stock</h1>
+    <p>Existencias, costos y alta de productos del catálogo.</p>
+  </div>
+
+  <div class="acciones">
+    <button type="button" class="btn" (click)="nuevo()">+ Nuevo producto</button>
+  </div>
+</div>
+
+<section class="rejilla rejilla-kpi">
+  <article class="kpi">
+    <p class="kpi-etiqueta">🏷️ Productos</p>
+    <p class="kpi-valor">{{ store.productos().length }}</p>
+    <p class="kpi-nota">{{ store.unidadesEnStock() }} unidades en total</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">📦 Valor a costo</p>
+    <p class="kpi-valor">{{ store.valorInventario() | moneda }}</p>
+    <p class="kpi-nota">Lo que costó la mercancía</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">💰 Valor a precio de venta</p>
+    <p class="kpi-valor positivo">{{ store.valorInventarioVenta() | moneda }}</p>
+    <p class="kpi-nota">Si se vendiera todo el inventario</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">⚠️ En o bajo el mínimo</p>
+    <p class="kpi-valor" [class.atencion]="store.productosBajoStock().length > 0">
+      {{ store.productosBajoStock().length }}
+    </p>
+    <p class="kpi-nota">Conviene generar una orden de compra</p>
+  </article>
+</section>
+
+@if (formAbierto()) {
+  <section class="bloque tarjeta">
+    <div class="seccion-titulo">
+      <h2>{{ borrador().id ? 'Editar producto' : 'Nuevo producto' }}</h2>
+      <button type="button" class="btn btn-suave btn-mini" (click)="cerrarForm()">Cancelar</button>
+    </div>
+
+    <div class="form-rejilla">
+      <div class="campo">
+        <label for="titulo">Nombre</label>
+        <input id="titulo" type="text" [value]="borrador().titulo" (input)="campo('titulo', $any($event.target).value)" />
+      </div>
+
+      <div class="campo">
+        <label for="categoria">Categoría</label>
+        <select id="categoria" [value]="borrador().categoria" (change)="campo('categoria', $any($event.target).value)">
+          @for (cat of store.categorias(); track cat.categoria) {
+            <option [value]="cat.categoria">{{ cat.titulo }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo campo-ancho">
+        <label for="descripcion">Descripción</label>
+        <input
+          id="descripcion"
+          type="text"
+          [value]="borrador().descripcion"
+          (input)="campo('descripcion', $any($event.target).value)"
+        />
+      </div>
+
+      <div class="campo">
+        <label for="costo">Costo</label>
+        <input id="costo" type="number" min="0" step="0.5" [value]="borrador().costo" (input)="campoNumero('costo', $any($event.target).value)" />
+      </div>
+
+      <div class="campo">
+        <label for="precio">Precio de venta</label>
+        <input id="precio" type="number" min="0" step="0.5" [value]="borrador().precio" (input)="campoNumero('precio', $any($event.target).value)" />
+      </div>
+
+      <div class="campo">
+        <label for="stock">Existencias</label>
+        <input id="stock" type="number" min="0" [value]="borrador().stock" (input)="campoNumero('stock', $any($event.target).value)" />
+      </div>
+
+      <div class="campo">
+        <label for="minimo">Stock mínimo</label>
+        <input id="minimo" type="number" min="0" [value]="borrador().stockMinimo" (input)="campoNumero('stockMinimo', $any($event.target).value)" />
+      </div>
+
+      <div class="campo campo-ancho">
+        <label for="imagen">Imagen (ruta opcional)</label>
+        <input
+          id="imagen"
+          type="text"
+          placeholder="assets/imagenes/producto.png"
+          [value]="borrador().imagen"
+          (input)="campo('imagen', $any($event.target).value)"
+        />
+      </div>
+    </div>
+
+    <div class="acciones acciones-form">
+      <button type="button" class="btn" (click)="guardar()">Guardar producto</button>
+      <button type="button" class="btn btn-suave" (click)="cerrarForm()">Cancelar</button>
+    </div>
+  </section>
+}
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Inventario</h2>
+    <span>{{ productos().length }} de {{ store.productos().length }} productos</span>
+  </div>
+
+  <div class="filtros">
+    <button type="button" class="chip" [class.activo]="!soloBajos()" (click)="soloBajos.set(false)">Todos</button>
+    <button type="button" class="chip" [class.activo]="soloBajos()" (click)="soloBajos.set(true)">
+      Bajo mínimo ({{ store.productosBajoStock().length }})
+    </button>
+  </div>
+
+  @if (productos().length === 0) {
+    <p class="vacio">No hay productos que coincidan con el filtro.</p>
+  } @else {
+    <div class="tabla-scroll">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th class="num">Costo</th>
+            <th class="num">Precio</th>
+            <th class="num">Margen</th>
+            <th class="num">Mínimo</th>
+            <th class="num">Existencias</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (producto of productos(); track producto.id) {
+            <tr>
+              <td>
+                <strong>{{ producto.titulo }}</strong>
+                <small class="tenue linea">{{ producto.descripcion || 'Sin descripción' }}</small>
+              </td>
+              <td class="suave">{{ store.tituloCategoria(producto.categoria) }}</td>
+              <td class="num">{{ producto.costo | moneda }}</td>
+              <td class="num">{{ producto.precio | moneda }}</td>
+              <td class="num" [class.positivo]="producto.precio > producto.costo" [class.negativo]="producto.precio <= producto.costo">
+                {{ producto.precio - producto.costo | moneda }}
+              </td>
+              <td class="num tenue">{{ producto.stockMinimo }}</td>
+              <td class="num">
+                <div class="contador">
+                  <button type="button" class="btn btn-suave btn-icono" (click)="ajustar(producto, -1)" aria-label="Restar una unidad">−</button>
+                  <input
+                    type="number"
+                    min="0"
+                    [value]="producto.stock"
+                    (change)="fijarStock(producto, $any($event.target).value)"
+                    [attr.aria-label]="'Existencias de ' + producto.titulo"
+                  />
+                  <button type="button" class="btn btn-suave btn-icono" (click)="ajustar(producto, 1)" aria-label="Sumar una unidad">+</button>
+                </div>
+              </td>
+              <td>
+                <span class="insignia" [class]="'insignia ' + estado(producto).clase">{{ estado(producto).texto }}</span>
+              </td>
+              <td class="num">
+                <div class="acciones">
+                  <button type="button" class="btn btn-suave btn-mini" (click)="editar(producto)">Editar</button>
+                  <button type="button" class="btn btn-peligro btn-mini" (click)="eliminar(producto)">Eliminar</button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

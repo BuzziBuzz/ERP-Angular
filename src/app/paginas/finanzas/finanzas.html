@@ -1,0 +1,219 @@
+<div class="pagina-titulo">
+  <div>
+    <h1>Finanzas</h1>
+    <p>Ingresos y egresos de todos los módulos, más los gastos que registres a mano.</p>
+  </div>
+</div>
+
+<section class="rejilla rejilla-kpi">
+  <article class="kpi">
+    <p class="kpi-etiqueta">💵 Ingresos</p>
+    <p class="kpi-valor positivo">{{ store.totalIngresos() | moneda }}</p>
+    <p class="kpi-nota">Ventas y otros ingresos</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">📉 Egresos</p>
+    <p class="kpi-valor negativo">{{ store.totalEgresos() | moneda }}</p>
+    <p class="kpi-nota">Compras, nómina y gastos</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">📈 Utilidad</p>
+    <p class="kpi-valor" [class.positivo]="store.utilidad() >= 0" [class.negativo]="store.utilidad() < 0">
+      {{ store.utilidad() | moneda }}
+    </p>
+    <p class="kpi-nota">Margen {{ store.margen() | number: '1.0-1' }}%</p>
+  </article>
+
+  <article class="kpi">
+    <p class="kpi-etiqueta">🧮 Movimientos</p>
+    <p class="kpi-valor">{{ store.movimientos().length }}</p>
+    <p class="kpi-nota">Registrados en el sistema</p>
+  </article>
+</section>
+
+<section class="bloque rejilla rejilla-2">
+  <article class="tarjeta">
+    <div class="seccion-titulo">
+      <h2>Ingresos vs egresos</h2>
+      <span>Últimos {{ ultimosMeses().length }} meses con actividad</span>
+    </div>
+
+    @if (ultimosMeses().length === 0) {
+      <p class="vacio">Registra ventas o gastos para ver la comparativa.</p>
+    } @else {
+      <div class="grafico">
+        @for (mes of ultimosMeses(); track mes.periodo) {
+          <div class="mes">
+            <div class="barras">
+              <div
+                class="barra barra-ingreso"
+                [style.height]="altura(mes.ingresos)"
+                [title]="'Ingresos: ' + (mes.ingresos | moneda)"
+              ></div>
+              <div
+                class="barra barra-egreso"
+                [style.height]="altura(mes.egresos)"
+                [title]="'Egresos: ' + (mes.egresos | moneda)"
+              ></div>
+            </div>
+            <span class="mes-etiqueta">{{ etiquetaMes(mes.periodo) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="leyenda">
+        <span><i class="punto barra-ingreso"></i> Ingresos</span>
+        <span><i class="punto barra-egreso"></i> Egresos</span>
+      </div>
+    }
+  </article>
+
+  <article class="tarjeta">
+    <div class="seccion-titulo">
+      <h2>Egresos por categoría</h2>
+    </div>
+
+    @if (egresosPorCategoria().length === 0) {
+      <p class="vacio">Todavía no hay egresos registrados.</p>
+    } @else {
+      <div class="tabla-scroll">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Categoría</th>
+              <th class="num">Monto</th>
+              <th class="num">% del total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fila of egresosPorCategoria(); track fila.categoria) {
+              <tr>
+                <td>{{ fila.categoria }}</td>
+                <td class="num fuerte">{{ fila.monto | moneda }}</td>
+                <td class="num tenue">{{ porcentaje(fila.monto) | number: '1.0-1' }}%</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </article>
+</section>
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Registrar movimiento manual</h2>
+    <span>Para gastos e ingresos que no vienen de ventas ni compras</span>
+  </div>
+
+  <div class="form-rejilla">
+    <div class="campo">
+      <label for="tipo">Tipo</label>
+      <select id="tipo" [value]="tipo()" (change)="tipo.set($any($event.target).value)">
+        <option value="egreso">Egreso</option>
+        <option value="ingreso">Ingreso</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="categoria-mov">Categoría</label>
+      <input
+        id="categoria-mov"
+        type="text"
+        list="categorias-gasto"
+        [value]="categoria()"
+        (input)="categoria.set($any($event.target).value)"
+      />
+      <datalist id="categorias-gasto">
+        @for (cat of categoriasGasto; track cat) {
+          <option [value]="cat"></option>
+        }
+      </datalist>
+    </div>
+
+    <div class="campo">
+      <label for="concepto">Concepto</label>
+      <input
+        id="concepto"
+        type="text"
+        placeholder="Renta del local, luz, etc."
+        [value]="concepto()"
+        (input)="concepto.set($any($event.target).value)"
+      />
+    </div>
+
+    <div class="campo">
+      <label for="monto">Monto</label>
+      <input id="monto" type="number" min="0" step="0.5" [value]="monto()" (input)="monto.set(numero($any($event.target).value))" />
+    </div>
+
+    <div class="campo">
+      <label for="fecha-mov">Fecha</label>
+      <input id="fecha-mov" type="date" [value]="fecha()" (input)="fecha.set($any($event.target).value)" />
+    </div>
+  </div>
+
+  <div class="acciones acciones-form">
+    <button type="button" class="btn" (click)="registrar()">Registrar movimiento</button>
+  </div>
+</section>
+
+<section class="bloque tarjeta">
+  <div class="seccion-titulo">
+    <h2>Movimientos</h2>
+    <span>{{ movimientos().length }} de {{ store.movimientos().length }}</span>
+  </div>
+
+  <div class="filtros">
+    <button type="button" class="chip" [class.activo]="filtro() === 'todos'" (click)="filtro.set('todos')">Todos</button>
+    <button type="button" class="chip" [class.activo]="filtro() === 'ingreso'" (click)="filtro.set('ingreso')">Ingresos</button>
+    <button type="button" class="chip" [class.activo]="filtro() === 'egreso'" (click)="filtro.set('egreso')">Egresos</button>
+  </div>
+
+  @if (movimientos().length === 0) {
+    <p class="vacio">No hay movimientos que coincidan con el filtro.</p>
+  } @else {
+    <div class="tabla-scroll">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Concepto</th>
+            <th>Categoría</th>
+            <th>Origen</th>
+            <th>Referencia</th>
+            <th class="num">Monto</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (movimiento of movimientos(); track movimiento.id) {
+            <tr>
+              <td class="tenue">{{ movimiento.fecha | fecha }}</td>
+              <td>{{ movimiento.concepto }}</td>
+              <td class="suave">{{ movimiento.categoria }}</td>
+              <td>
+                <span class="insignia insignia-neutra">{{ movimiento.origen }}</span>
+              </td>
+              <td class="mono tenue">{{ movimiento.referencia || '—' }}</td>
+              <td
+                class="num fuerte"
+                [class.positivo]="movimiento.tipo === 'ingreso'"
+                [class.negativo]="movimiento.tipo === 'egreso'"
+              >
+                {{ movimiento.tipo === 'ingreso' ? '+' : '−' }}{{ movimiento.monto | moneda }}
+              </td>
+              <td class="num">
+                @if (movimiento.origen === 'manual') {
+                  <button type="button" class="btn btn-peligro btn-mini" (click)="eliminar(movimiento)">Eliminar</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
