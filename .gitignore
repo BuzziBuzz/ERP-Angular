@@ -49,3 +49,6 @@ node_modules/
 dist/
 .angular/
 .vscode/
+
+#notas que se realizaron acerca del proyecto, estas notas son de caracter personal y no es necesario subirlas al repositorio.
+notas.md
