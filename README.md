@@ -1,7 +1,8 @@
 # ERP Drinks
 
-ERP local para un negocio de bebidas y alimentos, hecho con Angular 22 (standalone, zoneless).
+ERP local para un negocio de bebidas y alimentos, hecho con Angular 22.
 Todos los datos se guardan en el `localStorage` del navegador: no hay backend ni base de datos.
+En explicaciones posteriores se aclara que existira una version futura con backend.
 
 ## Arrancar
 
@@ -44,8 +45,8 @@ Los módulos no son pantallas sueltas: comparten un solo estado (`src/app/core/e
 src/app/
   core/       estado (ErpStore), modelos, almacenamiento local, avisos, pipes
   data/       datos iniciales (productos, categorías, empleados, proveedores)
-  paginas/    un componente por módulo, cargado con lazy loading
-  search/     barra de búsqueda global + menú de 3 puntos
+  paginas/    un componente por módulo.
+  search/     barra de búsqueda global + menú de 3 puntos (barra aun no funciona y se arreglara en futuras versiones).
   sidebar/    filtro de categorías del catálogo
   galeria/    tarjetas de producto
   avisos/     mensajes emergentes de resultado
@@ -58,8 +59,9 @@ src/app/
 - El renderizado es del lado del cliente (`RenderMode.Client`) porque `localStorage` solo existe en el
   navegador; así el HTML del servidor nunca discrepa de los datos reales.
 
-> El ISR y el IMSS de la nómina se estiman con tasas fijas por tramo para presupuestar el costo.
-> No sustituyen el cálculo fiscal oficial: valida los importes con tu contador.
+> El ISR y el IMSS de la nómina se estiman con tasas fijas por tramo para presupuestar el costo.Todos los datos son estimados.
+> Los calculos se realizan segun una representacion de los datos acuales en Mexico (11/09/26) DD/MM/AA
+> Estos documentos 'No sustituyen el cálculo fiscal oficial: valida los importes con tu contador'
 
 ## Pruebas
 
@@ -128,7 +130,7 @@ En caso de utilizar partes sustanciales del código fuente, se deberá conservar
 
 El proyecto utilizará un sistema de versiones para identificar su evolución y facilitar el seguimiento de cambios.
 
-**Versión actual:** En desarrollo
+**Versión actual: V1.1** En desarrollo
 
 Las futuras versiones podrán incorporar:
 
@@ -168,12 +170,12 @@ Durante el desarrollo de este proyecto se utilizaron herramientas de **Inteligen
 
 La IA fue utilizada como una herramienta de asistencia para actividades como:
 
-* Generación y revisión de código.
+* revisión de código.
 * Identificación y corrección de errores.
 * Propuesta de soluciones técnicas.
 * Optimización de determinadas funciones.
 * Apoyo en la documentación del proyecto.
-* Generación y mejora de estructuras, interfaces o componentes.
+* Generación y mejora de estructuras, interfaces o componentes ya sea visual o tecnica.
 * Consulta y explicación de conceptos relacionados con las tecnologías utilizadas.
 
 El uso de herramientas de Inteligencia Artificial **no implica que la totalidad del proyecto haya sido generada automáticamente**. El desarrollo, integración, revisión, modificación, pruebas y toma de decisiones sobre el funcionamiento del sistema corresponden al desarrollador.
@@ -211,6 +213,8 @@ El uso del sistema deberá realizarse respetando los derechos de autor del proye
 **Proyecto:** ERP — Sistema de Gestión Empresarial
 **Año:** 2026
 **Estado:** En desarrollo
+**Correo de contacto** axelrg772007gmail.com
+>Este es un proyecto institucional y puede llegar a perder atualizaciones.Use bajo su propio juicio.
 
 ---
 

@@ -1,8 +1,9 @@
 import { Producto } from '../core/models';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
-/**
- * para usarse copia en localstorage por lo que se recomienda no actualizar o recargar el server
- */
+
+
 export const PRODUCTOS: Producto[] = [
   {
     id: 1,
@@ -92,4 +93,38 @@ export const PRODUCTOS: Producto[] = [
     stock: 4,
     stockMinimo: 6,
   },
+  {
+    id: 9,
+    titulo: 'Ensalada César',
+    descripcion: 'Lechuga, pollo, crutones y aderezo César.',
+    imagen: '',
+    categoria: 'alimentos',
+    precio: 75,
+    costo: 32,
+    stock: 12,
+    stockMinimo: 8,
+  }
 ];
+/*
+se crea un servicio para manejar los productos, permitiendo actualizar la lista de productos y mantenerla sincronizada
+ con el almacenamiento local (localStorage). 
+ Esto facilita la gestión de los productos en la aplicación y asegura que los cambios 
+ se reflejen en todas las partes de la aplicación que consumen esta información.
+*/
+@Injectable({
+  providedIn: 'root'
+})
+export class ProductosService {
+  private readonly STORAGE_KEY = 'productos';
+  private productosSubject: BehaviorSubject<Producto[]>;
+
+  constructor() {
+    const productosGuardados = localStorage.getItem(this.STORAGE_KEY);
+    const productosIniciales = productosGuardados ? JSON.parse(productosGuardados) : PRODUCTOS;
+    this.productosSubject = new BehaviorSubject<Producto[]>(productosIniciales);
+  }
+  actualizarProductos(productos: Producto[]): void {
+    this.productosSubject.next(productos);
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(productos));
+  }
+}

@@ -86,8 +86,7 @@ export interface LineaNomina {
 export interface Nomina {
   id: number;
   folio: string;
-  /** Periodo en formato YYYY-MM.De gringolandia */
-  periodo: string;
+  periodo: string;  /** Periodo en formato YYYY-MM.*/
   fecha: string;
   lineas: LineaNomina[];
   totalBruto: number;
